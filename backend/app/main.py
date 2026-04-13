@@ -79,7 +79,8 @@ async def portfolio_ws(websocket: WebSocket, account_id: str):
     # --- TEMPORARY LIVE DATA SIMULATOR ---
     # This pumps fake live market data into your frontend to prove the WebSockets work!
     async def mock_market_stream():
-        import random, asyncio
+        import random
+        import asyncio
         current_price = 154.0
         while True:
             current_price += random.uniform(-0.50, 0.50) # Price moves by up to 50 cents a second

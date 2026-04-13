@@ -1,7 +1,6 @@
 import httpx
 import yfinance as yf
 import pandas as pd
-from datetime import datetime, timedelta
 from app.core.config import settings
 
 class PolygonFetcher:

@@ -3,7 +3,7 @@ from celery.schedules import crontab
 from datetime import datetime, timedelta
 from app.db.models import upsert_ohlcv
 from app.core.config import settings
-from .fetchers import PolygonFetcher, YahooFetcher
+from .fetchers import PolygonFetcher
 
 celery = Celery("equity_engine", broker=settings.REDIS_URL,
                 backend=settings.REDIS_URL)

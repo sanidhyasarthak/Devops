@@ -1,7 +1,6 @@
 import uuid
 from decimal import Decimal
 from datetime import datetime
-from typing import Optional
 from app.db.models import Position, db_session
 
 class PortfolioManager:
