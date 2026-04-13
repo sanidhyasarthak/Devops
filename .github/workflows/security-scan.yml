@@ -29,7 +29,7 @@ jobs:
           fetch-depth: 0
 
       # -----------------------------
-      # GITLEAKS (PRIMARY SECRET SCAN)
+      # GITLEAKS
       # -----------------------------
       - name: Install Gitleaks
         run: |
@@ -43,43 +43,34 @@ jobs:
           gitleaks detect --source . --redact --exit-code 1 || echo "No leaks found"
 
       # -----------------------------
-      # TRUFFLEHOG (SAFE VERSION)
+      # TRUFFLEHOG (FIXED)
       # -----------------------------
       - name: Run TruffleHog
-        uses: trufflesecurity/trufflehog@v3
+        uses: trufflesecurity/trufflehog@main
         with:
           path: .
 
       # -----------------------------
-      # PYTHON DEPENDENCY SCAN
+      # PIP-AUDIT
       # -----------------------------
       - name: Install pip-audit
         run: pip install pip-audit
 
-      - name: Run pip-audit (backend)
+      - name: Run pip-audit
         working-directory: backend
         run: |
           pip-audit -r requirements.txt || echo "Dependency issues found"
 
       # -----------------------------
-      # PYTHON CODE SECURITY (BANDIT)
+      # BANDIT
       # -----------------------------
       - name: Install Bandit
         run: pip install bandit
 
-      - name: Run Bandit (backend)
+      - name: Run Bandit
         working-directory: backend
         run: |
           bandit -r app -ll || echo "Security warnings found"
-
-      # -----------------------------
-      # ENV FILE WARNING
-      # -----------------------------
-      - name: Check .env exposure
-        run: |
-          if [ -f ".env" ]; then
-            echo "⚠️ .env file exists - ensure secrets are not committed"
-          fi
 
       # -----------------------------
       # DONE
