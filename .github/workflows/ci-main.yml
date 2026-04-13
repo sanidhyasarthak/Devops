@@ -1,0 +1,60 @@
+name: CI - Main Branch
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+concurrency:
+  group: main-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  full-ci:
+    uses: ./.github/workflows/reusable-python-ci.yml
+    with:
+      run_backtests: true
+
+  build-and-publish:
+    needs: full-ci
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}:latest .
+
+      - name: Login GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image
+        run: docker push ghcr.io/${{ github.repository }}:latest
+
+      - name: Build wheel
+        run: |
+          pip install build
+          python -m build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: trading-artifacts
+          path: dist/
+
+  notify:
+    needs: [build-and-publish]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Slack Notification
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data '{"text":"Main CI completed: ${{ job.status }}"}' \
+          ${{ secrets.SLACK_WEBHOOK }}
