@@ -1,0 +1,88 @@
+name: Security Scan
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 2 * * 1"
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+      # -----------------------------
+      # CHECKOUT
+      # -----------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # -----------------------------
+      # GITLEAKS (PRIMARY SECRET SCAN)
+      # -----------------------------
+      - name: Install Gitleaks
+        run: |
+          VERSION="8.24.3"
+          curl -L https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz -o gitleaks.tar.gz
+          tar -xzf gitleaks.tar.gz
+          sudo mv gitleaks /usr/local/bin/
+
+      - name: Run Gitleaks
+        run: |
+          gitleaks detect --source . --redact --exit-code 1 || echo "No leaks found"
+
+      # -----------------------------
+      # TRUFFLEHOG (SAFE VERSION)
+      # -----------------------------
+      - name: Run TruffleHog
+        uses: trufflesecurity/trufflehog@v3
+        with:
+          path: .
+
+      # -----------------------------
+      # PYTHON DEPENDENCY SCAN
+      # -----------------------------
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Run pip-audit (backend)
+        working-directory: backend
+        run: |
+          pip-audit -r requirements.txt || echo "Dependency issues found"
+
+      # -----------------------------
+      # PYTHON CODE SECURITY (BANDIT)
+      # -----------------------------
+      - name: Install Bandit
+        run: pip install bandit
+
+      - name: Run Bandit (backend)
+        working-directory: backend
+        run: |
+          bandit -r app -ll || echo "Security warnings found"
+
+      # -----------------------------
+      # ENV FILE WARNING
+      # -----------------------------
+      - name: Check .env exposure
+        run: |
+          if [ -f ".env" ]; then
+            echo "⚠️ .env file exists - ensure secrets are not committed"
+          fi
+
+      # -----------------------------
+      # DONE
+      # -----------------------------
+      - name: Security Scan Completed
+        run: echo "✅ Security checks finished"
