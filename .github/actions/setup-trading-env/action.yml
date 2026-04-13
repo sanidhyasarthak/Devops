@@ -1,0 +1,19 @@
+name: Setup Trading Environment
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set timezone to UTC
+      shell: bash
+      run: sudo timedatectl set-timezone UTC
+
+    - name: Set environment variables
+      shell: bash
+      run: |
+        echo "TRADING_MODE=CI" >> $GITHUB_ENV
+        echo "MARKET_DATA_MODE=mock" >> $GITHUB_ENV
+        echo "API_RATE_LIMIT=10" >> $GITHUB_ENV
+
+    - name: Print environment
+      shell: bash
+      run: env | grep -E "TRADING_MODE|MARKET_DATA_MODE|API_RATE_LIMIT"

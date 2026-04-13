@@ -1,0 +1,13 @@
+backend:
+  - backend/**
+
+frontend:
+  - frontend/**
+
+infra:
+  - .github/**
+  - docker-compose.yml
+
+config:
+  - "*.env"
+  - "*.yml"
