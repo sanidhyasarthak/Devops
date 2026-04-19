@@ -1,71 +1,15 @@
-# Project Title
 
-**SE Project - Full-Stack Web Application**
+## Overview
+This project demonstrates the power of **Machine Learning** and **Genetic Algorithms** by training an Artificial Neural Network to autonomously navigate a dynamically generated obstacle course. 
 
-## Problem Statement
+Instead of hard-coding the rules of flight, this program uses the **NEAT (NeuroEvolution of Augmenting Topologies)** algorithm. The AI begins with zero knowledge of physics or mechanics. Through iterative generations of random mutation, fitness evaluation, and selective breeding, the computer slowly evolves a flawless neural brain capable of endless survival.
 
-In the modern era of rapid digitalization, there is a growing need for a robust, scalable, and user-friendly full-stack web application that can efficiently handle user authentication, data management, and real-time interactions. 
-
-This project aims to develop a complete web application using the MERN/MEVN stack (or similar) with proper separation of concerns between frontend and backend, containerized deployment using Docker, and automated CI/CD pipelines to ensure code quality, reliability, and faster delivery.
-
-The application solves the problem of building and maintaining a production-ready full-stack system with modern DevOps practices while following industry-standard development workflows.
-
-## Architecture Diagram
-
-![Architecture Diagram](architecture-diagram.png)
-
-*(Replace the above line with the correct image path once you upload the architecture diagram to the repository. Recommended filename: `architecture-diagram.png` or `docs/architecture.png`)*
-
-**High-Level Architecture Overview:**
-- **Frontend**: React.js / Vue.js (Single Page Application)
-- **Backend**: Node.js + Express.js
-- **Database**: MongoDB / PostgreSQL
-- **Containerization**: Docker + Docker Compose
-- **CI/CD**: GitHub Actions
-- **Deployment**: Ready for cloud platforms (Render, Vercel, AWS, etc.)
-
-## CI/CD Pipeline Explanation
-
-The project uses **GitHub Actions** for Continuous Integration and Continuous Deployment.
-
-### Pipeline Stages:
-1. **Code Checkout** – Pulls the latest code from the repository
-2. **Backend Testing** – Runs backend unit/integration tests
-3. **Frontend Build & Test** – Installs dependencies, builds the React/Vue app, and runs linting/tests
-4. **Docker Build** – Builds multi-container Docker images using `docker-compose.yml`
-5. **Security Scan** (Optional) – Runs vulnerability scanning
-6. **Deploy** – Deploys to staging/production environment (can be configured for Render, Railway, AWS, etc.)
-
-Workflow files are located in `.github/workflows/`.
-
-The pipeline ensures that every push/pull request goes through automated testing and building before merging, reducing bugs in production.
-
-## Git Workflow Used
-
-This project follows the **GitFlow** workflow with the following branches:
-
-- **`main`** – Production-ready code (stable releases)
-- **`develop`** – Integration branch for ongoing development
-- **`feature/*`** – New features (e.g., `feature/user-auth`)
-- **`bugfix/*`** – Bug fixes
-- **`hotfix/*`** – Critical production fixes
-
-**Process:**
-- Developers create feature branches from `develop`
-- Pull requests are raised to `develop` branch
-- After review and successful CI/CD, changes are merged into `develop`
-- Releases are merged from `develop` to `main`
-
-## Tools Used
-
-- **Frontend**: React.js (with Vite) / Vue.js
-- **Backend**: Node.js + Express.js
-- **Database**: SQL
-- **Containerization**: Docker & Docker Compose
-- **Version Control**: Git + GitHub
-- **CI/CD**: GitHub Actions
-- **Code Editor**: Visual Studio Code
-- **Package Manager**: npm / yarn
-- **Other**: Postman (API testing), ESLint, Prettier
-
----
+## How the AI Works
+The project mimics biological evolution:
+1. **Population Initialization:** A population of neural networks (birds) is spawned into the environment. 
+2. **Inputs (Sensors):** Each network is fed 3 precise data points every frame:
+   - The entity's current Y-Axis position.
+   - The distance to the top obstacle.
+   - The distance to the bottom obstacle.
+3. **Fitness Function:** The longer an entity survives and moves forward, the higher its "Fitness Score."
+4. **Crossover & Mutation:** When all entities in a generation fail, the algorithm selects the highest-scoring networks, mutates their internal weights/biases, and breeds them to create the next, smarter generation.
