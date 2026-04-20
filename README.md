@@ -12,4 +12,4 @@ The project mimics biological evolution:
    - The distance to the top obstacle.
    - The distance to the bottom obstacle.
 3. **Fitness Function:** The longer an entity survives and moves forward, the higher its "Fitness Score."
-4. **Crossover & Mutation:** When all entities in a generation fail, the algorithm selects the highest-scoring networks, mutates their internal weights/biases, and breeds them to create the next, smarter generation.
+4. **Crossover & Mutation:** When all entities in a generation fail, the algorithm selects the highest-scoring networks, mutates their internal weights/biases, and breeds them to create the next, smarter gen.
