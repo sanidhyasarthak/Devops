@@ -17,31 +17,49 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'   # or '3.11' / '3.12' – choose what works with your pygame + neat-python
+        python-version: '3.10'
         cache: 'pip'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        # Optional: install extra linting tools
-        pip install pylint flake8
+        pip install flake8 pylint
 
     - name: Lint with flake8
       run: |
-        # Stop the build if there are Python syntax errors or undefined names
+        echo "Running flake8 linting..."
+        
+        # Strict check: Stop build on syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # Exit-zero treats all errors as warnings. GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        
+        # Main linting with F824 ignored temporarily (global WIN issue)
+        # Remove --ignore=F824 after fixing 'global WIN' in flappy_bird.py
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 \
+                 --ignore=F824 --statistics
 
-    - name: Lint with pylint (optional, can be strict)
+    - name: Lint with pylint (optional)
       run: |
-        pylint --disable=all --enable=error flappy_bird.py visualize.py || echo "Pylint found issues (non-blocking)"
+        pylint --disable=all --enable=error flappy_bird.py visualize.py || echo "Pylint issues found (non-blocking)"
 
     - name: Run basic smoke test (import check)
       run: |
-        python -c "import pygame; import neat; print('Dependencies imported successfully')"
+        python -c "import pygame; import neat; print('✅ Core dependencies imported successfully')"
         python -c "
-        import flappy_bird
-        print('flappy_bird module imported successfully')
-        " 2>/dev/null || echo "Note: flappy_bird may require display or full run to import cleanly"
+        try:
+            import flappy_bird
+            print('✅ flappy_bird module imported successfully')
+        except Exception as e:
+            print(f'⚠️  Note: flappy_bird import failed - {e}')
+        "
+
+    - name: Verify pygame can initialize (headless check)
+      run: |
+        python -c "
+        import os
+        os.environ['SDL_VIDEODRIVER'] = 'dummy'
+        import pygame
+        pygame.init()
+        print('✅ Pygame initialized in headless mode')
+        pygame.quit()
+        "
