@@ -32,8 +32,8 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         
         echo "🔍 Running main linting..."
-        # F824 ignored because of 'global WIN' in flappy_bird.py
-        # Best fix: Remove WIN from the global statement (only keep variables you assign to)
+        # Temporarily ignoring F824 because of 'global WIN' in flappy_bird.py
+        # Recommended fix: Remove "WIN" from the global line (only keep variables you assign to)
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 \
                  --ignore=F824 --statistics
 
@@ -62,7 +62,7 @@ jobs:
             print(f'⚠️ Import note: {e}')
         "
 
-    # ==================== DISCORD NOTIFICATION ====================
+    # Discord Notification (using your secret)
     - name: Notify Discord on Failure
       if: failure()
       uses: Ilshidur/action-discord@master
@@ -74,4 +74,4 @@ jobs:
           📁 Repository: ${{ github.repository }}
           🌿 Branch: ${{ github.ref_name }}
           🔗 Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          💡 Fix suggestion: In flappy_bird.py line ~315, change "global WIN, gen" to "global gen"
+          💡 Fix tip: In flappy_bird.py, change "global WIN, gen" to "global gen" at line ~315
