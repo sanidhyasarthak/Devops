@@ -28,33 +28,21 @@ jobs:
 
     - name: Lint with flake8
       run: |
-        echo "Running flake8 linting..."
-        
-        # Strict check: Stop build on syntax errors or undefined names
+        echo "🔍 Running syntax check..."
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         
-        # Main linting with F824 ignored temporarily (global WIN issue)
-        # Remove --ignore=F824 after fixing 'global WIN' in flappy_bird.py
+        echo "🔍 Running main linting..."
+        # F824 ignored because of 'global WIN' issue in flappy_bird.py
+        # Remove --ignore=F824 after fixing line 315 in flappy_bird.py
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 \
                  --ignore=F824 --statistics
 
-    - name: Lint with pylint (optional)
+    - name: Smoke tests
       run: |
-        pylint --disable=all --enable=error flappy_bird.py visualize.py || echo "Pylint issues found (non-blocking)"
-
-    - name: Run basic smoke test (import check)
-      run: |
-        python -c "import pygame; import neat; print('✅ Core dependencies imported successfully')"
-        python -c "
-        try:
-            import flappy_bird
-            print('✅ flappy_bird module imported successfully')
-        except Exception as e:
-            print(f'⚠️  Note: flappy_bird import failed - {e}')
-        "
-
-    - name: Verify pygame can initialize (headless check)
-      run: |
+        echo "✅ Testing core dependencies..."
+        python -c "import pygame, neat; print('✅ pygame and neat imported successfully')"
+        
+        echo "✅ Testing headless pygame..."
         python -c "
         import os
         os.environ['SDL_VIDEODRIVER'] = 'dummy'
@@ -63,3 +51,27 @@ jobs:
         print('✅ Pygame initialized in headless mode')
         pygame.quit()
         "
+
+    - name: Project import test
+      run: |
+        python -c "
+        try:
+            import flappy_bird
+            print('✅ flappy_bird module imported successfully')
+        except Exception as e:
+            print(f'⚠️ Import note: {e}')
+        "
+
+    # ==================== DISCORD NOTIFICATION ====================
+    - name: Notify Discord on Failure
+      if: failure()
+      uses: Ilshidur/action-discord@master
+      env:
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      with:
+        args: |
+          ❌ **CI Build Failed** - NEAT Flappy Bird
+          📁 Repository: ${{ github.repository }}
+          🌿 Branch: ${{ github.ref_name }}
+          🔗 Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          💡 Check the lint or test step for details.
