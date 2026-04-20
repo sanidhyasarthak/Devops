@@ -32,8 +32,6 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         
         echo "🔍 Running main linting..."
-        # F824 ignored due to 'global WIN' in flappy_bird.py
-        # Fix: Remove WIN from global statement → "global gen"
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 \
                  --ignore=F824 --statistics
 
@@ -67,7 +65,7 @@ jobs:
       if: success()
       uses: Ilshidur/action-discord@master
       env:
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}   # ← This mapping is critical
       with:
         args: |
           ✅ **CI Build Passed** - NEAT Flappy Bird
@@ -87,4 +85,4 @@ jobs:
           📁 Repository: ${{ github.repository }}
           🌿 Branch: ${{ github.ref_name }}
           🔗 Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          💡 Fix tip: In flappy_bird.py line ~315, change "global WIN, gen" to "global gen"
+          💡 Tip: Fix "global WIN" in flappy_bird.py (line ~315)
