@@ -2,76 +2,90 @@ name: CI - Test & Lint
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
+
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-        cache: 'pip'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip"
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install flake8 pylint
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install flake8 pylint
 
-    - name: Lint with flake8
-      run: |
-        echo "🔍 Running syntax check..."
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        
-        echo "🔍 Running main linting..."
-        # Temporarily ignoring F824 because of 'global WIN' in flappy_bird.py
-        # Recommended fix: Remove "WIN" from the global line (only keep variables you assign to)
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 \
-                 --ignore=F824 --statistics
+      - name: Lint with flake8
+        run: |
+          echo "Running syntax check..."
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
-    - name: Smoke tests
-      run: |
-        echo "✅ Testing core dependencies..."
-        python -c "import pygame, neat; print('✅ pygame and neat imported successfully')"
-        
-        echo "✅ Testing headless pygame..."
-        python -c "
-        import os
-        os.environ['SDL_VIDEODRIVER'] = 'dummy'
-        import pygame
-        pygame.init()
-        print('✅ Pygame initialized in headless mode')
-        pygame.quit()
-        "
+          echo "Running main linting..."
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 \
+                   --ignore=F824 --statistics
 
-    - name: Project import test
-      run: |
-        python -c "
-        try:
-            import flappy_bird
-            print('✅ flappy_bird module imported successfully')
-        except Exception as e:
-            print(f'⚠️ Import note: {e}')
-        "
+      - name: Smoke tests
+        run: |
+          echo "Testing core dependencies..."
+          python -c "import pygame, neat; print('pygame and neat imported successfully')"
 
-    # Discord Notification (using your secret)
-    - name: Notify Discord on Failure
-      if: failure()
-      uses: Ilshidur/action-discord@master
-      env:
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-      with:
-        args: |
-          ❌ **CI Build Failed** - NEAT Flappy Bird
-          📁 Repository: ${{ github.repository }}
-          🌿 Branch: ${{ github.ref_name }}
-          🔗 Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          💡 Fix tip: In flappy_bird.py, change "global WIN, gen" to "global gen" at line ~315
+          echo "Testing headless pygame..."
+          python -c "
+          import os
+          os.environ['SDL_VIDEODRIVER']='dummy'
+          import pygame
+          pygame.init()
+          print('Pygame initialized in headless mode')
+          pygame.quit()
+          "
+
+      - name: Project import test
+        run: |
+          python -c "
+          try:
+              import flappy_bird
+              print('flappy_bird imported successfully')
+          except Exception as e:
+              print(f'Import note: {e}')
+          "
+
+      - name: Check Secret Exists
+        run: |
+          if [ -z "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
+            echo "DISCORD_WEBHOOK_URL secret is missing."
+            exit 1
+          fi
+
+      - name: Notify Discord on Success
+        if: success()
+        run: |
+          curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d @- <<EOF
+          {
+            "content": "✅ CI Build Passed - NEAT Flappy Bird\n📁 Repository: ${{ github.repository }}\n🌿 Branch: ${{ github.ref_name }}\n🔗 Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n🎉 All linting and tests passed successfully!"
+          }
+          EOF
+
+      - name: Notify Discord on Failure
+        if: failure()
+        run: |
+          curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d @- <<EOF
+          {
+            "content": "❌ CI Build Failed - NEAT Flappy Bird\n📁 Repository: ${{ github.repository }}\n🌿 Branch: ${{ github.ref_name }}\n🔗 Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          }
+          EOF
