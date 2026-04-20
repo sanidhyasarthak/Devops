@@ -31,7 +31,9 @@ jobs:
         echo "🔍 Running syntax check..."
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         
-        echo "🔍 Running main linting (F824 ignored due to global WIN)..."
+        echo "🔍 Running main linting..."
+        # F824 is ignored because of unnecessary 'global WIN' in flappy_bird.py:315
+        # Fix: Change "global WIN, gen" to "global gen" in your Python file
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 \
                  --ignore=F824 --statistics
 
@@ -68,8 +70,9 @@ jobs:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
       with:
         args: |
-          ❌ **CI Build Failed** - NEAT Flappy Bird
+          ❌ **CI Build Failed** - NEAT Flappy Bird Project
           📁 Repository: ${{ github.repository }}
           🌿 Branch: ${{ github.ref_name }}
           🔗 Run Link: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          💡 Please check the Lint step (F824 global WIN issue).
+          💡 The build is failing due to a lint error (F824 global WIN).
+          Please fix line 315 in flappy_bird.py
