@@ -60,29 +60,19 @@ jobs:
             print(f'⚠️ Import note: {e}')
         "
 
-    # ==================== DISCORD NOTIFICATIONS ====================
+    # ==================== DISCORD NOTIFICATIONS (Reliable curl method) ====================
     - name: Notify Discord on Success
       if: success()
-      uses: Ilshidur/action-discord@master
-      env:
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}   # ← This mapping is critical
-      with:
-        args: |
-          ✅ **CI Build Passed** - NEAT Flappy Bird
-          📁 Repository: ${{ github.repository }}
-          🌿 Branch: ${{ github.ref_name }}
-          🔗 Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          🎉 All linting and tests passed successfully!
+      run: |
+        curl -H "Content-Type: application/json" \
+             -X POST \
+             -d "{\"content\": \"✅ **CI Build Passed** - NEAT Flappy Bird\n📁 Repository: ${{ github.repository }}\n🌿 Branch: ${{ github.ref_name }}\n🔗 Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n🎉 All linting and tests passed successfully!\"}" \
+             ${{ secrets.DISCORD_WEBHOOK_URL }}
 
     - name: Notify Discord on Failure
       if: failure()
-      uses: Ilshidur/action-discord@master
-      env:
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-      with:
-        args: |
-          ❌ **CI Build Failed** - NEAT Flappy Bird
-          📁 Repository: ${{ github.repository }}
-          🌿 Branch: ${{ github.ref_name }}
-          🔗 Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          💡 Tip: Fix "global WIN" in flappy_bird.py (line ~315)
+      run: |
+        curl -H "Content-Type: application/json" \
+             -X POST \
+             -d "{\"content\": \"❌ **CI Build Failed** - NEAT Flappy Bird\n📁 Repository: ${{ github.repository }}\n🌿 Branch: ${{ github.ref_name }}\n🔗 Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n💡 Tip: Fix \\\"global WIN\\\" in flappy_bird.py (line ~315)\"}" \
+             ${{ secrets.DISCORD_WEBHOOK_URL }}
