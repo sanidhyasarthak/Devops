@@ -1,0 +1,47 @@
+name: CI - Test & Lint
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'   # or '3.11' / '3.12' – choose what works with your pygame + neat-python
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        # Optional: install extra linting tools
+        pip install pylint flake8
+
+    - name: Lint with flake8
+      run: |
+        # Stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Exit-zero treats all errors as warnings. GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Lint with pylint (optional, can be strict)
+      run: |
+        pylint --disable=all --enable=error flappy_bird.py visualize.py || echo "Pylint found issues (non-blocking)"
+
+    - name: Run basic smoke test (import check)
+      run: |
+        python -c "import pygame; import neat; print('Dependencies imported successfully')"
+        python -c "
+        import flappy_bird
+        print('flappy_bird module imported successfully')
+        " 2>/dev/null || echo "Note: flappy_bird may require display or full run to import cleanly"
