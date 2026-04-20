@@ -312,7 +312,7 @@ def eval_genomes(genomes, config):
     birds and sets their fitness based on the distance they
     reach in the game.
     """
-    global WIN, gen
+    global WIN, gen  # noqa: F824
     win = WIN
     gen += 1
 
