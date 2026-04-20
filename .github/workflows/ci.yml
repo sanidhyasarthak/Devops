@@ -31,9 +31,7 @@ jobs:
         echo "🔍 Running syntax check..."
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         
-        echo "🔍 Running main linting..."
-        # F824 ignored because of 'global WIN' issue in flappy_bird.py
-        # Remove --ignore=F824 after fixing line 315 in flappy_bird.py
+        echo "🔍 Running main linting (F824 ignored due to global WIN)..."
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 \
                  --ignore=F824 --statistics
 
@@ -62,7 +60,7 @@ jobs:
             print(f'⚠️ Import note: {e}')
         "
 
-    # ==================== DISCORD NOTIFICATION ====================
+    # ==================== DISCORD NOTIFICATION (Fixed) ====================
     - name: Notify Discord on Failure
       if: failure()
       uses: Ilshidur/action-discord@master
@@ -73,5 +71,5 @@ jobs:
           ❌ **CI Build Failed** - NEAT Flappy Bird
           📁 Repository: ${{ github.repository }}
           🌿 Branch: ${{ github.ref_name }}
-          🔗 Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          💡 Check the lint or test step for details.
+          🔗 Run Link: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          💡 Please check the Lint step (F824 global WIN issue).
