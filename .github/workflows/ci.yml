@@ -32,8 +32,8 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         
         echo "🔍 Running main linting..."
-        # F824 is ignored because of unnecessary 'global WIN' in flappy_bird.py:315
-        # Fix: Change "global WIN, gen" to "global gen" in your Python file
+        # F824 ignored because of 'global WIN' in flappy_bird.py
+        # Best fix: Remove WIN from the global statement (only keep variables you assign to)
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 \
                  --ignore=F824 --statistics
 
@@ -62,7 +62,7 @@ jobs:
             print(f'⚠️ Import note: {e}')
         "
 
-    # ==================== DISCORD NOTIFICATION (Fixed) ====================
+    # ==================== DISCORD NOTIFICATION ====================
     - name: Notify Discord on Failure
       if: failure()
       uses: Ilshidur/action-discord@master
@@ -70,9 +70,8 @@ jobs:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
       with:
         args: |
-          ❌ **CI Build Failed** - NEAT Flappy Bird Project
+          ❌ **CI Build Failed** - NEAT Flappy Bird
           📁 Repository: ${{ github.repository }}
           🌿 Branch: ${{ github.ref_name }}
-          🔗 Run Link: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          💡 The build is failing due to a lint error (F824 global WIN).
-          Please fix line 315 in flappy_bird.py
+          🔗 Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          💡 Fix suggestion: In flappy_bird.py line ~315, change "global WIN, gen" to "global gen"
